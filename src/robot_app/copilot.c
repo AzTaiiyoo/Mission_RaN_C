@@ -3,6 +3,7 @@
 #include <string.h>
 #include <termios.h>
 #include <unistd.h>
+#include <stdio.h>
 
 #include "copilot.h"
 #include "pilot.h"
@@ -24,6 +25,8 @@ static int current_step;
 static bool in_avoidance = false;
 static int avoidance_step = 0;
 static move_t interrupted_move; 
+
+static bool is_locked = false;
 
 static void enable_raw_mode(){
     struct termios raw;
@@ -124,6 +127,19 @@ bool copilot_wait_user_input(move_t *user_move) {
 
     // Vérifie si une touche est disponible
     if (read(STDIN_FILENO, &c, 1) == 1) {
+        // Gestion de la touche de verrouillage
+        if (c == 'v' || c == 'V') {
+            is_locked = !is_locked;  // Inverse l'état du verrouillage
+            printf("\r%s", is_locked ? "Robot verrouillé   " : "Robot déverrouillé ");
+            fflush(stdout);
+            return false;
+        }
+
+        // Si le robot est verrouillé, ignore toutes les autres touches
+        if (is_locked) {
+            return false;
+        }
+
         switch(c) {
             case 65: // Flèche haut
             case 'z':
@@ -154,5 +170,5 @@ bool copilot_wait_user_input(move_t *user_move) {
         }
     }
     
-    return false;  // Aucune touche valide n'a été pressée
+    return false;
 }

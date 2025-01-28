@@ -84,13 +84,14 @@ void init_path(void) {
 
 static void app_loop() {
     robot_status_t my_status;
-    move_t user_move;  // Notez que ce n'est plus un pointeur
+    move_t user_move;
     
     printf("Mode manuel activé\n");
     printf("Utilisez les flèches ou ZQSD pour contrôler le robot:\n");
     printf("↑ ou Z: Avancer\n");
     printf("← ou Q: Tourner à gauche\n");
     printf("→ ou D: Tourner à droite\n");
+    printf("V: Verrouiller/Déverrouiller les commandes\n");
     printf("Échap ou Ctrl+C pour quitter\n");
     
     while (running) {
@@ -115,5 +116,5 @@ static void app_loop() {
         usleep(10000);  // Petit délai pour ne pas surcharger le CPU
     }
     
-    printf("\n");  // Nouvelle ligne à la fin
+    printf("\n");
 }
