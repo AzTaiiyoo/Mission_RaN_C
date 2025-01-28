@@ -19,7 +19,7 @@ typedef struct {
 // Configure le path à suivre
 void set_path_config(path_cfg_t config);
 // Attend une entrée de l'utilisateur
-void copilot_wait_user_input(move_t user_move);
+bool copilot_wait_user_input(move_t *user_move);
 
 void copilot_start_path(void);
 path_status_t copilot_stop_at_step_completion(void);

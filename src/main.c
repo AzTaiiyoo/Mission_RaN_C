@@ -81,34 +81,39 @@ void init_path(void) {
  * @brief Main loop for the application.
  * Send commands to copilot and display robot's status with a specific period.
  */
+
 static void app_loop() {
     robot_status_t my_status;
+    move_t user_move;  // Notez que ce n'est plus un pointeur
     
-    // Initialiser d'abord le chemin
-    init_path();
-    
-    // Démarrer le chemin avec copilot
-    copilot_start_path();  // Cette ligne manquait !
+    printf("Mode manuel activé\n");
+    printf("Utilisez les flèches ou ZQSD pour contrôler le robot:\n");
+    printf("↑ ou Z: Avancer\n");
+    printf("← ou Q: Tourner à gauche\n");
+    printf("→ ou D: Tourner à droite\n");
+    printf("Échap ou Ctrl+C pour quitter\n");
     
     while (running) {
+        // Affiche le statut périodiquement
         my_status = robot_get_status();
-        fprintf(stdout, "codeurs: g = %d, d = %d\n", 
-                my_status.left_encoder, my_status.right_encoder);
-        fprintf(stdout, "proxy: g = %d, c = %d, d = %d\n", 
-                my_status.left_sensor, my_status.center_sensor, my_status.right_sensor);
-        fprintf(stdout, "batterie: %d %%\n", my_status.battery);
-
-        move_t user_move;
-        copilot_wait_user_input(user_move);
-
-        /* Encoders polling */
-        for (int i = 0; i < ENCODERS_SCAN_NB; i++) {
-            usleep(DELAY);
-            path_status_t path_status = copilot_stop_at_step_completion();
-            if (path_status == PATH_DONE) {
-                running = STOPPED;
-                break;
+        fprintf(stdout, "\rcodeurs: g = %d, d = %d | proxy: g = %d, c = %d, d = %d | batterie: %d %%",
+                my_status.left_encoder, my_status.right_encoder,
+                my_status.left_sensor, my_status.center_sensor, my_status.right_sensor,
+                my_status.battery);
+        fflush(stdout);
+        
+        // Vérifie les entrées utilisateur
+        if (copilot_wait_user_input(&user_move)) {
+            pilot_start_move(user_move);
+            
+            // Attend la fin du mouvement
+            while (pilot_stop_at_target() != MOVE_DONE && running) {
+                usleep(1000);
             }
         }
+        
+        usleep(10000);  // Petit délai pour ne pas surcharger le CPU
     }
+    
+    printf("\n");  // Nouvelle ligne à la fin
 }
