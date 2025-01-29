@@ -5,15 +5,20 @@
 
 #define DISTANCE_FORWARD 200
 #define DISTANCE_TURN 242
-#define OBSTACLE_THRESHOLD 200
+#define OBSTACLE_THRESHOLD 120
 
 static move_status_t robot_moving = MOVE_DONE;
 static int target_pos;
 static wheel_t reference_wheel;
 
+static move_t previous_move;
+
 void pilot_start_move(move_t a_move) {
     TRACE("Starting move: type=%d, distance/angle=%d, speed=%d\n",
           a_move.move_type, a_move.range.distance, a_move.speed);
+    
+    // Sauvegarde du mouvement précédent
+    previous_move = a_move;
     
     robot_reset_wheel_pos(); 
     
@@ -53,13 +58,33 @@ void pilot_start_move(move_t a_move) {
 
 move_status_t pilot_stop_at_target(void) {
     int current_pos = robot_get_wheel_position(reference_wheel);
+    robot_status_t status = robot_get_status();
+    
     TRACE("Encoder position: %d, Target: %d, Moving status: %d\n", 
           current_pos, target_pos, robot_moving);
+
+    // Vérification de l'obstacle seulement si on avance
+    if (robot_moving == MOVE_FORWARD && status.center_sensor < OBSTACLE_THRESHOLD) {
+        TRACE("Obstacle detected, stopping robot\n");
+        robot_set_speed(0, 0);
+        return MOVE_OBSTACLE_FORWARD;
+    }
     
-    if(current_pos >= target_pos) {
+    // Si on était en état d'obstacle et qu'il n'y en a plus
+    if (robot_moving == MOVE_OBSTACLE_FORWARD && status.center_sensor >= OBSTACLE_THRESHOLD) {
+        if (previous_move.move_type == FORWARD) {
+            robot_moving = MOVE_DONE;
+            TRACE("Obstacle cleared, resuming previous move\n");
+            pilot_start_move(previous_move);
+            return robot_moving;
+        }
+    }
+    
+    // Vérification si on a atteint la position cible
+    if (current_pos >= target_pos) {
         TRACE("Target reached\n");
         robot_set_speed(0, 0);
-        robot_moving = MOVE_DONE;
+        return MOVE_DONE;
     }
     
     return robot_moving;
