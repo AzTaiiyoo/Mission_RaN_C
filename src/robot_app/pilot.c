@@ -3,8 +3,8 @@
 #include "../utils.h"
 #include <stdio.h>
 
-#define DISTANCE_FORWARD 200
-#define DISTANCE_TURN 242
+#define DISTANCE_FORWARD 2
+#define DISTANCE_TURN 2
 #define OBSTACLE_THRESHOLD 120
 
 static move_status_t robot_moving = MOVE_DONE;
@@ -64,14 +64,14 @@ move_status_t pilot_stop_at_target(void) {
           current_pos, target_pos, robot_moving);
 
     // Vérification de l'obstacle seulement si on avance
-    if (robot_moving == MOVE_FORWARD && status.center_sensor < OBSTACLE_THRESHOLD) {
+    if (robot_moving == MOVE_FORWARD && status.center_sensor < OBSTACLE_THRESHOLD || status.left_sensor < OBSTACLE_THRESHOLD || status.right_sensor < OBSTACLE_THRESHOLD) {
         TRACE("Obstacle detected, stopping robot\n");
         robot_set_speed(0, 0);
         return MOVE_OBSTACLE_FORWARD;
     }
     
     // Si on était en état d'obstacle et qu'il n'y en a plus
-    if (robot_moving == MOVE_OBSTACLE_FORWARD && status.center_sensor >= OBSTACLE_THRESHOLD) {
+    if (robot_moving == MOVE_OBSTACLE_FORWARD && status.center_sensor >= OBSTACLE_THRESHOLD || status.left_sensor >= OBSTACLE_THRESHOLD || status.right_sensor >= OBSTACLE_THRESHOLD) {
         if (previous_move.move_type == FORWARD) {
             robot_moving = MOVE_DONE;
             TRACE("Obstacle cleared, resuming previous move\n");
