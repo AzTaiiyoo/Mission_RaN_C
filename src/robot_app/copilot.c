@@ -73,10 +73,9 @@ path_status_t copilot_stop_at_step_completion(void) {
     switch (move_status) {
         case MOVE_DONE:
             if (in_avoidance) {
-                
                 avoidance_step++;
                 if (avoidance_step >= AVOIDANCE_STEPS) {
-                    
+                    // Fin du chemin d'évitement, reprise du chemin initial
                     in_avoidance = false;
                     pilot_start_move(interrupted_move);
                 } else {
@@ -84,7 +83,7 @@ path_status_t copilot_stop_at_step_completion(void) {
                     pilot_start_move(avoidance_path[avoidance_step]);
                 }
             } else {
-               
+                // Progression normale dans le chemin
                 current_step++;
                 if (current_step >= path_step) {
                     path_status = PATH_DONE;
@@ -96,13 +95,14 @@ path_status_t copilot_stop_at_step_completion(void) {
             
         case MOVE_OBSTACLE_FORWARD:
             if (!in_avoidance) {
-               
+                // Début du chemin d'évitement
                 interrupted_move = path[current_step];
                 in_avoidance = true;
                 avoidance_step = 0;
                 pilot_start_move(avoidance_path[avoidance_step]);
             } else {
-                
+                // On a rencontré un autre obstacle pendant l'évitement
+                // On recommence depuis le début du chemin d'évitement
                 avoidance_step = 0;
                 pilot_start_move(avoidance_path[avoidance_step]);
             }

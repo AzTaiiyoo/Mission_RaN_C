@@ -70,16 +70,6 @@ move_status_t pilot_stop_at_target(void) {
         return MOVE_OBSTACLE_FORWARD;
     }
     
-    // Si on était en état d'obstacle et qu'il n'y en a plus
-    if (robot_moving == MOVE_OBSTACLE_FORWARD && status.center_sensor >= OBSTACLE_THRESHOLD) {
-        if (previous_move.move_type == FORWARD) {
-            robot_moving = MOVE_DONE;
-            TRACE("Obstacle cleared, resuming previous move\n");
-            pilot_start_move(previous_move);
-            return robot_moving;
-        }
-    }
-    
     // Vérification si on a atteint la position cible
     if (current_pos >= target_pos) {
         TRACE("Target reached\n");

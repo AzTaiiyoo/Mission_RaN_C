@@ -84,43 +84,30 @@ void init_path(void) {
 
 static void app_loop() {
     robot_status_t my_status;
-    move_t user_move;
-    move_status_t move_status;
     
-    printf("Mode manuel activé\n");
-    printf("Utilisez les flèches ou ZQSD pour contrôler le robot:\n");
-    printf("↑ ou Z: Avancer\n");
-    printf("← ou Q: Tourner à gauche\n");
-    printf("→ ou D: Tourner à droite\n");
-    printf("i: Augmenter la vitesse de déplacemenet\n");
-    printf("o: Diminuer la vitesse de déplacement\n");
-    printf("V: Verrouiller/Déverrouiller les commandes\n");
-    printf("Échap ou Ctrl+C pour quitter\n");
+    // Initialiser le chemin
+    init_path();
+    
+    // Démarrer le chemin
+    copilot_start_path();
     
     while (running) {
-        // Affiche le statut périodiquement
         my_status = robot_get_status();
         fprintf(stdout, "\rcodeurs: g = %d, d = %d | proxy: g = %d, c = %d, d = %d | batterie: %d %%",
                 my_status.left_encoder, my_status.right_encoder,
                 my_status.left_sensor, my_status.center_sensor, my_status.right_sensor,
                 my_status.battery);
         fflush(stdout);
-        
-        // Vérifie les entrées utilisateur
-        if (copilot_wait_user_input(&user_move)) {
-            pilot_start_move(user_move);
-            
-            // Attend la fin du mouvement ou un obstacle
-            while (running) {
-                move_status = pilot_stop_at_target();
-                if (move_status == MOVE_DONE || move_status == MOVE_OBSTACLE_FORWARD) {
-                    break;  // Sort de la boucle si mouvement terminé ou obstacle détecté
-                }
-                usleep(1000);
+
+        /* Encoders polling */
+        for (int i = 0; i < ENCODERS_SCAN_NB; i++) {
+            usleep(DELAY);
+            path_status_t path_status = copilot_stop_at_step_completion();
+            if (path_status == PATH_DONE) {
+                running = STOPPED;
+                break;
             }
         }
-        
-        usleep(10000);  // Petit délai pour ne pas surcharger le CPU
     }
     
     printf("\n");
