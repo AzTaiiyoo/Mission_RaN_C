@@ -92,6 +92,8 @@ static void app_loop() {
     printf("↑ ou Z: Avancer\n");
     printf("← ou Q: Tourner à gauche\n");
     printf("→ ou D: Tourner à droite\n");
+    printf("i: Augmenter la vitesse de déplacemenet\n");
+    printf("o: Diminuer la vitesse de déplacement\n");
     printf("V: Verrouiller/Déverrouiller les commandes\n");
     printf("Échap ou Ctrl+C pour quitter\n");
     

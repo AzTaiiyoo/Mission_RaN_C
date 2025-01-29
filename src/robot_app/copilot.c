@@ -9,6 +9,7 @@
 #include "pilot.h"
 
 #define AVOIDANCE_STEPS 4
+
 static const move_t avoidance_path[AVOIDANCE_STEPS] = {
     {ROTATION, {LEFT}, 20},    
     {FORWARD, {2}, 30},         
@@ -27,6 +28,9 @@ static int avoidance_step = 0;
 static move_t interrupted_move; 
 
 static bool is_locked = false;
+
+static int TURN_SPEED = 20;
+static int FORWARD_SPEED = 30;
 
 static void enable_raw_mode(){
     struct termios raw;
@@ -145,27 +149,37 @@ bool copilot_wait_user_input(move_t *user_move) {
             case 'z':
                 user_move->move_type = FORWARD;
                 user_move->range.distance = 2;
-                user_move->speed = 30;
+                user_move->speed = FORWARD_SPEED;
                 return true;
                 
             case 68: // Flèche gauche
             case 'q':
                 user_move->move_type = ROTATION;
                 user_move->range.angle = LEFT;
-                user_move->speed = 20;
+                user_move->speed = TURN_SPEED;
                 return true;
                 
             case 67: // Flèche droite
             case 'd':
                 user_move->move_type = ROTATION;
                 user_move->range.angle = RIGHT;
-                user_move->speed = 20;
+                user_move->speed = TURN_SPEED;
                 return true;
                 
             case 3:  // Ctrl+C
             case 27: // Échap
                 disable_raw_mode();
                 raw_mode_enabled = false;
+                return false;
+
+            case 'i':
+                TURN_SPEED += 5;
+                FORWARD_SPEED += 5;
+                return false;
+            
+            case 'o':
+                TURN_SPEED -= 5;
+                FORWARD_SPEED -= 5;
                 return false;
         }
     }
