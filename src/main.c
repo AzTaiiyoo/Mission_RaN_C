@@ -98,7 +98,7 @@ static void app_loop() {
     printf("Échap ou Ctrl+C pour quitter\n");
     
     while (running) {
-        // Affiche le statut périodiquement
+        
         my_status = robot_get_status();
         fprintf(stdout, "\rcodeurs: g = %d, d = %d | proxy: g = %d, c = %d, d = %d | batterie: %d %%",
                 my_status.left_encoder, my_status.right_encoder,
@@ -106,21 +106,21 @@ static void app_loop() {
                 my_status.battery);
         fflush(stdout);
         
-        // Vérifie les entrées utilisateur
+       
         if (copilot_wait_user_input(&user_move)) {
             pilot_start_move(user_move);
             
-            // Attend la fin du mouvement ou un obstacle
+            
             while (running) {
                 move_status = pilot_stop_at_target();
                 if (move_status == MOVE_DONE || move_status == MOVE_OBSTACLE_FORWARD) {
-                    break;  // Sort de la boucle si mouvement terminé ou obstacle détecté
+                    break;  
                 }
                 usleep(1000);
             }
         }
         
-        usleep(10000);  // Petit délai pour ne pas surcharger le CPU
+        usleep(10000);  
     }
     
     printf("\n");
