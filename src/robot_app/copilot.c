@@ -129,45 +129,45 @@ bool copilot_wait_user_input(move_t *user_move) {
         raw_mode_enabled = true;
     }
 
-    // Vérifie si une touche est disponible
+   
     if (read(STDIN_FILENO, &c, 1) == 1) {
-        // Gestion de la touche de verrouillage
+       
         if (c == 'v' || c == 'V') {
-            is_locked = !is_locked;  // Inverse l'état du verrouillage
+            is_locked = !is_locked; 
             printf("\r%s", is_locked ? "Robot verrouillé   " : "Robot déverrouillé ");
             fflush(stdout);
             return false;
         }
 
-        // Si le robot est verrouillé, ignore toutes les autres touches
+        
         if (is_locked) {
             return false;
         }
 
         switch(c) {
-            case 65: // Flèche haut
+            case 65: 
             case 'z':
                 user_move->move_type = FORWARD;
                 user_move->range.distance = 2;
                 user_move->speed = FORWARD_SPEED;
                 return true;
                 
-            case 68: // Flèche gauche
+            case 68: 
             case 'q':
                 user_move->move_type = ROTATION;
                 user_move->range.angle = LEFT;
                 user_move->speed = TURN_SPEED;
                 return true;
                 
-            case 67: // Flèche droite
+            case 67: 
             case 'd':
                 user_move->move_type = ROTATION;
                 user_move->range.angle = RIGHT;
                 user_move->speed = TURN_SPEED;
                 return true;
                 
-            case 3:  // Ctrl+C
-            case 27: // Échap
+            case 3:  
+            case 27: 
                 disable_raw_mode();
                 raw_mode_enabled = false;
                 return false;
