@@ -4,8 +4,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-#define DISTANCE_FORWARD 20
-#define DISTANCE_TURN 20
+#define DISTANCE_FORWARD 30
+#define DISTANCE_TURN 30
 #define OBSTACLE_THRESHOLD 120
 
 static move_status_t robot_moving = MOVE_DONE;
